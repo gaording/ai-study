@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const SettingsWindow: React.FC = () => {
   const [whitelistType, setWhitelistType] = useState<'contact' | 'app'>('contact');
   const [whitelistValue, setWhitelistValue] = useState('');
   const [keyword, setKeyword] = useState('');
   const [focusModeName, setFocusModeName] = useState('工作');
+
+  useEffect(() => {
+    // Load saved focus mode name on mount
+    window.electronAPI.getFocusModeName().then((name) => {
+      setFocusModeName(name);
+    });
+  }, []);
 
   const handleSaveFocusMode = async () => {
     try {
