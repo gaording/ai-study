@@ -4,7 +4,6 @@ import { promisify } from 'util';
 const execAsync = promisify(exec);
 
 export class DNDController {
-  private previousDNDState: boolean = false;
   private focusModeName: string = '工作';
 
   setFocusModeName(name: string): void {
@@ -39,23 +38,5 @@ export class DNDController {
   async disableDND(): Promise<void> {
     // Temporarily disabled automatic DND control
     console.log('Automatic DND control is disabled. Please manually disable DND if needed.');
-  }
-
-  private async getDNDState(): Promise<boolean> {
-    try {
-      const script = `
-        tell application "System Events"
-          tell process "ControlCenter"
-            return value of checkbox 1 of group 1 of window "Control Center"
-          end tell
-        end tell
-      `;
-
-      const { stdout } = await execAsync(`osascript -e '${script}'`);
-      return stdout.trim() === '1';
-    } catch (error) {
-      console.error('Failed to get DND state:', error);
-      return false;
-    }
   }
 }

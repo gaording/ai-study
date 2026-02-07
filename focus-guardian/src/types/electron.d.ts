@@ -5,6 +5,16 @@ export interface FocusStatus {
   sessionId?: number;
 }
 
+export interface FocusSession {
+  id: number;
+  startTime: number;
+  endTime?: number;
+  plannedDuration: number;
+  status: string;
+  screenshotPath?: string;
+  workContext?: string;
+}
+
 export interface Notification {
   id: string;
   appName: string;
@@ -33,6 +43,10 @@ export interface ElectronAPI {
   stopFocus: () => Promise<void>;
   getFocusStatus: () => Promise<FocusStatus>;
   onFocusUpdate: (callback: (status: FocusStatus) => void) => void;
+  captureScreenshot: () => Promise<string | null>;
+  saveWorkContext: (sessionId: number, screenshotPath: string | null, workContext: string) => Promise<void>;
+  getLastSession: () => Promise<FocusSession | null>;
+  getHistory: () => Promise<FocusSession[]>;
 
   getNotifications: () => Promise<Notification[]>;
   markAsRead: (id: string) => Promise<void>;
@@ -46,6 +60,8 @@ export interface ElectronAPI {
   removeKeyword: (id: number) => Promise<void>;
   saveFocusModeName: (name: string) => Promise<void>;
   getFocusModeName: () => Promise<string>;
+
+  openPath: (path: string) => Promise<string>;
 }
 
 declare global {

@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS focus_sessions (
   end_time INTEGER,
   planned_duration INTEGER NOT NULL,
   status TEXT CHECK(status IN ('active', 'completed', 'cancelled')),
+  screenshot_path TEXT,
+  work_context TEXT,
   created_at INTEGER DEFAULT (strftime('%s', 'now'))
 );
 

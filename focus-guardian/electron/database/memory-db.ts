@@ -6,6 +6,8 @@ interface FocusSession {
   end_time?: number;
   planned_duration: number;
   status: string;
+  screenshot_path?: string;
+  work_context?: string;
 }
 
 interface QueuedNotification {
@@ -53,10 +55,24 @@ class MemoryDatabase {
           return { lastInsertRowid: session.id };
         }
         if (sql.includes('UPDATE focus_sessions')) {
-          const session = this.focusSessions.find(s => s.id === params[2]);
-          if (session) {
-            session.end_time = params[0];
-            session.status = params[1];
+          if (sql.includes('screenshot_path')) {
+            // Update work context
+            // SQL: UPDATE focus_sessions SET screenshot_path = ?, work_context = ? WHERE id = ?
+            // params: [screenshotPath, workContext, id]
+            const session = this.focusSessions.find(s => s.id === params[2]);
+            if (session) {
+              session.screenshot_path = params[0];
+              session.work_context = params[1];
+            }
+          } else {
+            // Update end time and status
+            // SQL: UPDATE focus_sessions SET end_time = ?, status = 'completed' WHERE id = ?
+            // params: [endTime, id]
+            const session = this.focusSessions.find(s => s.id === params[1]);
+            if (session) {
+              session.end_time = params[0];
+              session.status = 'completed';
+            }
           }
         }
         if (sql.includes('INSERT INTO queued_notifications')) {
@@ -107,6 +123,11 @@ class MemoryDatabase {
             (w.type === 'contact' && w.value === params[1])
           );
         }
+        if (sql.includes('FROM focus_sessions') && sql.includes('ORDER BY id DESC')) {
+          return this.focusSessions.length > 0
+            ? this.focusSessions[this.focusSessions.length - 1]
+            : null;
+        }
         return null;
       },
       all: () => {
@@ -118,6 +139,13 @@ class MemoryDatabase {
         }
         if (sql.includes('FROM urgent_keywords')) {
           return this.keywords;
+        }
+        if (sql.includes('FROM focus_sessions')) {
+          // Return sessions in reverse chronological order (newest first)
+          return [...this.focusSessions]
+            .filter(s => s.status === 'completed')
+            .sort((a, b) => b.id - a.id)
+            .slice(0, 10); // Limit to 10 most recent sessions
         }
         return [];
       }

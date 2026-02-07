@@ -69,9 +69,9 @@ export class RuleEngine {
       SELECT COUNT(*) as count
       FROM queued_notifications
       WHERE sender = ? AND timestamp BETWEEN ? AND ?
-    `).get(sender, threeMinutesAgo, timestamp) as { count: number };
+    `).get(sender, threeMinutesAgo, timestamp) as unknown as { count: number } | null;
 
-    if (result.count >= 3) {
+    if (result && result.count >= 3) {
       return { isUrgent: true, reason: '重复消息（3次/3分钟）' };
     }
 

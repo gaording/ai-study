@@ -33,11 +33,15 @@ function App() {
     });
   }, [setStatus]);
 
-  if (route === '/tray') return <TrayWindow />;
-  if (route === '/queue') return <QueueWindow />;
-  if (route === '/settings') return <SettingsWindow />;
+  const content = route === '/queue' ? <QueueWindow /> :
+                  route === '/settings' ? <SettingsWindow /> :
+                  <TrayWindow />;
 
-  return <TrayWindow />;
+  return (
+    <div className="w-screen h-screen bg-transparent flex items-start justify-start">
+      {content}
+    </div>
+  );
 }
 
 export default App

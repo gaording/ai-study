@@ -1,7 +1,7 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, screen } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { initDatabase, closeDatabase } from './database/memory-db';
+import { initDatabase, closeDatabase, getDatabase } from './database/memory-db';
 import { FocusManager } from './focus-manager';
 import { DNDController } from './dnd-controller';
 import { NotificationMonitor } from './notification-monitor';
@@ -23,12 +23,24 @@ let _ruleEngine: RuleEngine | null = null;
 let _trayManager: TrayManager | null = null;
 
 function createWindow() {
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
+
+  const windowWidth = 300;
+  const windowHeight = 200;
+  const margin = 20;
+
   mainWindow = new BrowserWindow({
-    width: 400,
-    height: 600,
+    width: windowWidth,
+    height: windowHeight,
+    x: screenWidth - windowWidth - margin,
+    y: screenHeight - windowHeight - margin,
     show: true,
-    frame: true,
-    resizable: true,
+    frame: false,
+    transparent: true,
+    resizable: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -38,7 +50,8 @@ function createWindow() {
 
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-    mainWindow.webContents.openDevTools();
+    // Disable DevTools for small floating window
+    // mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
@@ -98,6 +111,31 @@ function setupIpcHandlers() {
 
   ipcMain.handle('focus:status', () => {
     return focusManager?.getStatus() || { isActive: false, remainingTime: 0, plannedDuration: 0 };
+  });
+
+  ipcMain.handle('focus:captureScreenshot', async () => {
+    if (focusManager) {
+      return await focusManager.captureScreenshot();
+    }
+    return null;
+  });
+
+  ipcMain.handle('focus:saveWorkContext', async (_event, sessionId: number, screenshotPath: string | null, workContext: string) => {
+    if (focusManager) {
+      await focusManager.saveWorkContext(sessionId, screenshotPath, workContext);
+    }
+  });
+
+  ipcMain.handle('focus:getLastSession', async () => {
+    if (focusManager) {
+      return focusManager.getLastSession();
+    }
+    return null;
+  });
+
+  ipcMain.handle('focus:getHistory', async () => {
+    const db = getDatabase();
+    return db.prepare('SELECT * FROM focus_sessions ORDER BY id DESC').all();
   });
 
   // Notification handlers
@@ -162,5 +200,10 @@ function setupIpcHandlers() {
     const db = require('./database/memory-db').getDatabase();
     const result = db.prepare('SELECT value FROM settings WHERE key = ?').get('focus_mode_name');
     return result?.value || '工作';
+  });
+
+  // Shell handlers
+  ipcMain.handle('shell:openPath', async (_event, path: string) => {
+    return await shell.openPath(path);
   });
 }

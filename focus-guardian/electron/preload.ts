@@ -10,8 +10,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   stopFocus: () => ipcRenderer.invoke('focus:stop'),
   getFocusStatus: () => ipcRenderer.invoke('focus:status'),
   onFocusUpdate: (callback: (status: any) => void) => {
-    ipcRenderer.on('focus:update', (_event, status) => callback(status));
+    ipcRenderer.on('focus:update', (_event: any, status: any) => callback(status));
   },
+  captureScreenshot: () => ipcRenderer.invoke('focus:captureScreenshot'),
+  saveWorkContext: (sessionId: number, screenshotPath: string | null, workContext: string) =>
+    ipcRenderer.invoke('focus:saveWorkContext', sessionId, screenshotPath, workContext),
+  getLastSession: () => ipcRenderer.invoke('focus:getLastSession'),
+  getHistory: () => ipcRenderer.invoke('focus:getHistory'),
 
   // Notification methods
   getNotifications: () => ipcRenderer.invoke('notifications:get'),
@@ -27,6 +32,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   removeKeyword: (id: number) => ipcRenderer.invoke('settings:removeKeyword', id),
   saveFocusModeName: (name: string) => ipcRenderer.invoke('settings:saveFocusModeName', name),
   getFocusModeName: () => ipcRenderer.invoke('settings:getFocusModeName'),
+
+  // Shell methods
+  openPath: (path: string) => ipcRenderer.invoke('shell:openPath', path),
 });
 
 console.log('electronAPI exposed successfully!');
