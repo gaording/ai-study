@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简历助手 - AI智能面试准备系统</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1>📄 简历助手</h1>
+                <p class="tagline">AI智能面试准备系统</p>
+            </div>
+            <nav class="nav">
+                <button class="nav-btn active" data-module="resume">简历管理</button>
+                <button class="nav-btn" data-module="job">岗位分析</button>
+                <button class="nav-btn" data-module="optimize">简历优化</button>
+                <button class="nav-btn" data-module="prepare">面试准备</button>
+                <button class="nav-btn" data-module="interview">模拟面试</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <div class="container">
+            <!-- 进度指示器 -->
+            <div class="progress-bar">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">上传简历</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">分析岗位</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">优化简历</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">准备面试</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="5">
+                    <div class="step-number">5</div>
+                    <div class="step-label">模拟面试</div>
+                </div>
+            </div>
+
+            <!-- 模块1: 简历管理 -->
+            <section id="module-resume" class="module active">
+                <div class="module-header">
+                    <h2>📄 简历管理</h2>
+                    <p>上传您的简历，我们将智能解析并提取关键信息</p>
+                </div>
+
+                <div class="upload-area">
+                    <div class="upload-box" id="resumeUpload">
+                        <div class="upload-icon">📤</div>
+                        <h3>上传简历</h3>
+                        <p>支持 PDF、DOCX、DOC、图片格式（自动OCR识别），最大50MB</p>
+                        <input type="file" id="resumeFile" accept=".pdf,.docx,.doc,.jpg,.jpeg,.png,.bmp" hidden>
+                        <button class="btn-primary" onclick="document.getElementById('resumeFile').click()">
+                            选择文件
+                        </button>
+                    </div>
+                </div>
+
+                <div class="resume-preview" id="resumePreview" style="display: none;">
+                    <h3>简历信息预览</h3>
+                    <div class="info-card">
+                        <h4>基本信息</h4>
+                        <div id="basicInfo"></div>
+                    </div>
+                    <div class="info-card">
+                        <h4>工作经历</h4>
+                        <div id="workExperience"></div>
+                    </div>
+                    <div class="info-card">
+                        <h4>项目经验</h4>
+                        <div id="projects"></div>
+                    </div>
+                    <div class="info-card">
+                        <h4>技能清单</h4>
+                        <div id="skills"></div>
+                    </div>
+                    <button class="btn-primary" onclick="nextModule('job')">下一步：分析岗位</button>
+                </div>
+            </section>
+
+            <!-- 模块3: 简历优化 -->
+            <section id="module-optimize" class="module">
+                <div class="module-header">
+                    <h2>✨ 简历优化</h2>
+                    <p>基于岗位要求，为您提供针对性的简历优化建议</p>
+                </div>
+
+                <div class="match-score">
+                    <div class="score-circle">
+                        <div class="score-value" id="matchScore">0</div>
+                        <div class="score-label">匹配度</div>
+                    </div>
+                </div>
+
+                <div class="optimization-result">
+                    <div class="info-card">
+                        <h4>✅ 优势分析</h4>
+                        <div id="advantages"></div>
+                    </div>
+                    <div class="info-card">
+                        <h4>⚠️ 不足分析</h4>
+                        <div id="weaknesses"></div>
+                    </div>
+                    <div class="info-card">
+                        <h4>💡 优化建议</h4>
+                        <div id="suggestions"></div>
+                    </div>
+                    <button class="btn-primary" onclick="nextModule('prepare')">下一步：准备面试</button>
+                </div>
+            </section>
+
+            <!-- 模块2: 岗位分析 -->
+            <section id="module-job" class="module">
+                <div class="module-header">
+                    <h2>🎯 岗位分析</h2>
+                    <p>上传目标岗位信息，AI将智能分析岗位要求和能力模型</p>
+                    <p id="resumePositionHint" style="color: #666; font-size: 14px; margin-top: 5px;"></p>
+                </div>
+
+                <div class="job-input-area">
+                    <div class="input-tabs">
+                        <button class="tab-btn active" data-tab="text">文本粘贴</button>
+                        <button class="tab-btn" data-tab="image">截图上传</button>
+                        <button class="tab-btn" data-tab="url">URL抓取</button>
+                    </div>
+
+                    <div class="tab-content active" id="tab-text">
+                        <textarea id="jobDescription" placeholder="请粘贴岗位描述（JD）内容..." rows="10"></textarea>
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button class="btn-secondary" onclick="clearJobDescription()">清空</button>
+                            <button class="btn-primary" onclick="analyzeJob()">开始分析</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="tab-image">
+                        <div class="upload-box">
+                            <div class="upload-icon">📷</div>
+                            <p>上传岗位描述截图</p>
+                            <input type="file" id="jobImage" accept="image/*" hidden>
+                            <button class="btn-secondary" onclick="document.getElementById('jobImage').click()">
+                                选择图片
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="tab-url">
+                        <input type="url" id="jobUrl" placeholder="请输入招聘网站的岗位链接（如：Boss直聘、拉勾、猎聘等）...">
+                        <button class="btn-primary" onclick="fetchJobFromUrl()">抓取岗位信息</button>
+                        <p style="color: #999; font-size: 12px; margin-top: 10px;">支持：Boss直聘、拉勾网、猎聘、智联招聘等主流招聘网站</p>
+                    </div>
+                </div>
+
+                <div class="job-analysis-result" id="jobAnalysisResult" style="display: none;">
+                    <h3>岗位分析报告</h3>
+                    <div class="info-card">
+                        <h4>岗位基本信息</h4>
+                        <div id="jobBasicInfo"></div>
+                    </div>
+                    <div class="info-card">
+                        <h4>核心能力要求</h4>
+                        <div id="capabilityModel"></div>
+                    </div>
+                    <div class="info-card">
+                        <h4>必备技能</h4>
+                        <div id="requiredSkills"></div>
+                    </div>
+                    <div class="info-card">
+                        <h4>面试侧重点预测</h4>
+                        <div id="interviewFocus"></div>
+                    </div>
+                    <button class="btn-primary" onclick="nextModule('optimize')">下一步：优化简历</button>
+                </div>
+            </section>
+
+            <!-- 模块3: 简历优化 -->
+            <section id="module-optimize" class="module">
+                <div class="module-header">
+                    <h2>✨ 简历优化</h2>
+                    <p>基于岗位要求，为您提供针对性的简历优化建议</p>
+                </div>
+
+                <div class="match-score">
+                    <div class="score-circle">
+                        <div class="score-value" id="matchScore">0</div>
+                        <div class="score-label">匹配度</div>
+                    </div>
+                </div>
+
+                <div class="optimization-result">
+                    <div class="info-card">
+                        <h4>✅ 优势分析</h4>
+                        <div id="advantages"></div>
+                    </div>
+                    <div class="info-card">
+                        <h4>⚠️ 不足分析</h4>
+                        <div id="weaknesses"></div>
+                    </div>
+                    <div class="info-card">
+                        <h4>💡 优化建议</h4>
+                        <div id="suggestions"></div>
+                    </div>
+                    <button class="btn-primary" onclick="nextModule('prepare')">下一步：准备面试</button>
+                </div>
+            </section>
+
+            <!-- 模块4: 面试准备 -->
+            <section id="module-prepare" class="module">
+                <div class="module-header">
+                    <h2>💡 面试准备</h2>
+                    <p>生成个性化的面试准备手册，助您胸有成竹</p>
+                </div>
+
+                <div class="prepare-content">
+                    <div class="info-card">
+                        <h4>自我介绍</h4>
+                        <div id="selfIntroduction"></div>
+                    </div>
+
+                    <div class="info-card">
+                        <h4>重点项目介绍</h4>
+                        <div id="projectPresentation"></div>
+                    </div>
+
+                    <div class="info-card">
+                        <h4>常见问题准备</h4>
+                        <div id="interviewQuestions"></div>
+                    </div>
+
+                    <button class="btn-primary" onclick="nextModule('interview')">开始模拟面试</button>
+                </div>
+            </section>
+
+            <!-- 模块5: 模拟面试 -->
+            <section id="module-interview" class="module">
+                <div class="module-header">
+                    <h2>🎭 模拟面试</h2>
+                    <p>AI面试官与您进行真实的面试对话，提升面试技巧</p>
+                </div>
+
+                <div class="interview-setup" id="interviewSetup">
+                    <h3>面试设置</h3>
+                    <div class="setup-options">
+                        <div class="option-group">
+                            <label>面试轮次</label>
+                            <select id="interviewRound">
+                                <option value="1">一面（直属领导）</option>
+                                <option value="2">二面（部门总监）</option>
+                                <option value="3">三面（VP/CEO）</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label>面试时长</label>
+                            <select id="interviewDuration">
+                                <option value="30">30分钟</option>
+                                <option value="45" selected>45分钟</option>
+                                <option value="60">60分钟</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="startInterview()">开始面试</button>
+                </div>
+
+                <div class="interview-chat" id="interviewChat" style="display: none;">
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input">
+                        <div style="display: flex; gap: 10px; align-items: flex-end;">
+                            <button id="voiceRecordBtn" class="btn-voice" onclick="toggleVoiceRecord()" title="点击开始/停止录音">
+                                <span id="voiceRecordIcon">🎤</span>
+                                <span id="voiceRecordText">按住说话</span>
+                            </button>
+                            <textarea id="userAnswer" placeholder="输入您的回答，或点击麦克风说话..." rows="3"></textarea>
+                            <button class="btn-primary" onclick="sendAnswer()">发送</button>
+                        </div>
+                        <div id="voiceStatus" style="font-size: 12px; color: #999; margin-top: 5px; display: none;">
+                            <span id="voiceStatusText">🎤 正在录音...</span>
+                        </div>
+                    </div>
+                    <div class="interview-timer">
+                        <span>剩余时间：</span>
+                        <span id="remainingTime">45:00</span>
+                    </div>
+                </div>
+
+                <div class="interview-report" id="interviewReport" style="display: none;">
+                    <h3>面试报告</h3>
+                    <div class="report-score">
+                        <div class="score-circle">
+                            <div class="score-value" id="interviewScore">0</div>
+                            <div class="score-label">总分</div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h4>优势分析</h4>
+                        <div id="interviewAdvantages"></div>
+                    </div>
+                    <div class="info-card">
+                        <h4>改进建议</h4>
+                        <div id="interviewSuggestions"></div>
+                    </div>
+                    <button class="btn-secondary" onclick="restartInterview()">重新面试</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 页面底部 -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 简历助手 - AI智能面试准备系统</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/jobAgentClient.js"></script>
+    <script src="js/resumeParser.js?v=8"></script>
+    <script src="js/app.js?v=16"></script>
+    <script>
+        // 配置智谱AI API密钥
+        window.ZHIPU_API_KEY = 'b530d21ff0b748c39f874fb47a0e7689.Cc5D9ojd4y4myeB6';
+    </script>
+</body>
+</html>
