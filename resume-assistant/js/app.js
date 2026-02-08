@@ -1265,8 +1265,37 @@ function initSpeechRecognition() {
 
         recognition.onerror = function(event) {
             console.error('❌ 语音识别错误:', event.error);
-            updateVoiceStatus(`识别错误: ${event.error}`);
-            stopVoiceRecognition();
+
+            let errorMessage = '识别错误';
+
+            switch(event.error) {
+                case 'no-speech':
+                    errorMessage = '未检测到语音，请重试';
+                    break;
+                case 'audio-capture':
+                    errorMessage = '无法访问麦克风';
+                    break;
+                case 'not-allowed':
+                    errorMessage = '麦克风权限被拒绝，请在浏览器设置中允许访问';
+                    break;
+                case 'network':
+                    errorMessage = '网络错误，请检查网络连接';
+                    break;
+                case 'aborted':
+                    errorMessage = '识别已取消';
+                    break;
+                default:
+                    errorMessage = `识别错误: ${event.error}`;
+            }
+
+            updateVoiceStatus(errorMessage);
+            isRecording = false;
+            updateVoiceRecordButton();
+
+            // 如果是权限问题，显示更详细的提示
+            if (event.error === 'not-allowed') {
+                alert('无法访问麦克风\n\n请按以下步骤操作：\n1. 点击浏览器地址栏左侧的锁图标\n2. 找到"麦克风"权限\n3. 选择"允许"\n4. 刷新页面重试');
+            }
         };
 
         recognition.onend = function() {
@@ -1385,14 +1414,111 @@ function speakText(text) {
     synthesis.speak(utterance);
 }
 
-// 修改addChatMessage函数，自动播放面试官的语音
+// 语音开关状态
+let voiceEnabled = true;
+
+// 切换语音开关
+function toggleVoice() {
+    voiceEnabled = !voiceEnabled;
+
+    const toggleBtn = document.getElementById('voiceToggle');
+    if (toggleBtn) {
+        toggleBtn.textContent = voiceEnabled ? '🔊 语音开' : '🔇 语音关';
+        toggleBtn.classList.toggle('active', voiceEnabled);
+    }
+
+    // 如果关闭语音，停止当前正在播放的语音
+    if (!voiceEnabled && synthesis) {
+        synthesis.cancel();
+    }
+
+    console.log(`语音${voiceEnabled ? '已开启' : '已关闭'}`);
+    return voiceEnabled;
+}
+
+// 卡通人物动画控制
+let isSpeaking = false;
+
+function setInterviewerSpeaking(speaking) {
+    const avatar = document.getElementById('interviewerAvatar');
+    const svg = avatar?.querySelector('.avatar-svg');
+    const waves = document.getElementById('speakingWaves');
+
+    if (!svg) return;
+
+    isSpeaking = speaking;
+
+    if (speaking) {
+        svg.classList.add('speaking');
+        if (waves) waves.style.display = 'block';
+    } else {
+        svg.classList.remove('speaking');
+        if (waves) waves.style.display = 'none';
+    }
+}
+
+// 改进的语音播放函数
+function speakText(text) {
+    if (!voiceEnabled) {
+        console.log('语音已关闭，跳过播放');
+        return;
+    }
+
+    if (!synthesis) {
+        console.warn('浏览器不支持语音合成API');
+        return;
+    }
+
+    // 取消当前正在播放的语音
+    synthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    // 尝试加载中文语音
+    const voices = synthesis.getVoices();
+    const chineseVoice = voices.find(voice => voice.lang.includes('zh'));
+    if (chineseVoice) {
+        utterance.voice = chineseVoice;
+    }
+
+    utterance.lang = 'zh-CN';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    utterance.onstart = function() {
+        console.log('🔊 开始播放语音');
+        setInterviewerSpeaking(true);
+    };
+
+    utterance.onend = function() {
+        console.log('✅ 语音播放完成');
+        setInterviewerSpeaking(false);
+    };
+
+    utterance.onerror = function(event) {
+        console.error('❌ 语音播放错误:', event.error);
+        setInterviewerSpeaking(false);
+    };
+
+    synthesis.speak(utterance);
+}
+
+// 确保语音列表已加载（Chrome需要等待）
+if (synthesis) {
+    synthesis.onvoiceschanged = function() {
+        console.log('语音列表已加载，共', synthesis.getVoices().length, '种语音');
+    };
+}
+
+// 修改addChatMessage函数，自动播放面试官的语音并触发动画
 const originalAddChatMessage = addChatMessage;
 addChatMessage = function(role, content) {
     // 调用原始函数添加消息
     originalAddChatMessage(role, content);
 
     // 如果是面试官的消息，自动播放语音
-    if (role === 'interviewer') {
+    if (role === 'interviewer' && voiceEnabled) {
         // 添加一个小的延迟，确保UI先更新
         setTimeout(() => {
             speakText(content);

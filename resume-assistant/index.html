@@ -279,6 +279,52 @@
                 </div>
 
                 <div class="interview-chat" id="interviewChat" style="display: none;">
+                    <!-- 卡通面试官 -->
+                    <div class="interviewer-container">
+                        <button id="voiceToggle" class="voice-toggle active" onclick="toggleVoice()" title="点击开启/关闭语音">
+                            🔊 语音开
+                        </button>
+                        <div class="interviewer-avatar" id="interviewerAvatar">
+                            <svg class="avatar-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                <!-- 背景圆 -->
+                                <circle cx="100" cy="100" r="95" fill="#667eea"/>
+                                <!-- 脸 -->
+                                <circle cx="100" cy="95" r="60" fill="#FFE4C4"/>
+                                <!-- 头发 -->
+                                <path d="M45 80 Q50 40 100 35 Q150 40 155 80 L155 70 Q150 30 100 25 Q50 30 45 70 Z" fill="#4A3728"/>
+                                <!-- 眉毛 -->
+                                <g id="eyebrows">
+                                    <path d="M65 75 Q75 72 85 75" stroke="#4A3728" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                    <path d="M115 75 Q125 72 135 75" stroke="#4A3728" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                </g>
+                                <!-- 眼睛 -->
+                                <g id="eyes">
+                                    <ellipse cx="75" cy="90" rx="10" ry="12" fill="#333"/>
+                                    <ellipse cx="125" cy="90" rx="10" ry="12" fill="#333"/>
+                                    <!-- 眼睛高光 -->
+                                    <circle cx="78" cy="87" r="3" fill="white"/>
+                                    <circle cx="128" cy="87" r="3" fill="white"/>
+                                </g>
+                                <!-- 鼻子 -->
+                                <path d="M100 95 L98 108 L102 108 Z" fill="#DEB887"/>
+                                <!-- 嘴巴 -->
+                                <g id="mouth">
+                                    <path class="mouth-normal" d="M80 125 Q100 135 120 125" stroke="#C0392B" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                </g>
+                                <!-- 身体/领子 -->
+                                <path d="M50 155 L100 165 L150 155 L140 200 L60 200 Z" fill="#2C3E50"/>
+                                <path d="M70 155 L100 165 L130 155 L125 170 L100 175 L75 170 Z" fill="white"/>
+                            </svg>
+                            <!-- 说话动画波纹 -->
+                            <div class="speaking-waves" id="speakingWaves" style="display: none;">
+                                <div class="wave wave-1"></div>
+                                <div class="wave wave-2"></div>
+                                <div class="wave wave-3"></div>
+                            </div>
+                        </div>
+                        <div class="interviewer-label">AI 面试官</div>
+                    </div>
+
                     <div class="chat-messages" id="chatMessages"></div>
                     <div class="chat-input">
                         <div style="display: flex; gap: 10px; align-items: flex-end;">
@@ -331,7 +377,7 @@
     <!-- JavaScript -->
     <script src="js/jobAgentClient.js"></script>
     <script src="js/resumeParser.js?v=8"></script>
-    <script src="js/app.js?v=16"></script>
+    <script src="js/app.js?v=17"></script>
     <script>
         // 配置智谱AI API密钥
         window.ZHIPU_API_KEY = 'b530d21ff0b748c39f874fb47a0e7689.Cc5D9ojd4y4myeB6';
