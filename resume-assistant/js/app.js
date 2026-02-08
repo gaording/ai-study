@@ -1,5 +1,10 @@
 // 简历助手 - 主应用逻辑
 
+// API Key 配置兼容性处理
+if (window.CONFIG && window.CONFIG.ZHIPU_API_KEY) {
+    window.ZHIPU_API_KEY = window.CONFIG.ZHIPU_API_KEY;
+}
+
 // 全局状态管理
 const appState = {
     currentModule: 'resume',
@@ -1259,6 +1264,16 @@ function initSpeechRecognition() {
                 const textarea = document.getElementById('userAnswer');
                 if (textarea) {
                     textarea.value = finalTranscript;
+
+                    // 如果开启了自动发送，延迟1秒后自动发送
+                    if (autoSendEnabled) {
+                        setTimeout(() => {
+                            updateVoiceStatus('正在发送...');
+                            sendAnswer();
+                        }, 1000);
+                    } else {
+                        updateVoiceStatus('识别完成，请点击发送');
+                    }
                 }
             }
         };
@@ -1416,6 +1431,7 @@ function speakText(text) {
 
 // 语音开关状态
 let voiceEnabled = true;
+let autoSendEnabled = true;
 
 // 切换语音开关
 function toggleVoice() {
@@ -1423,7 +1439,7 @@ function toggleVoice() {
 
     const toggleBtn = document.getElementById('voiceToggle');
     if (toggleBtn) {
-        toggleBtn.textContent = voiceEnabled ? '🔊 语音开' : '🔇 语音关';
+        toggleBtn.textContent = voiceEnabled ? '🔊 语音' : '🔇 语音';
         toggleBtn.classList.toggle('active', voiceEnabled);
     }
 
@@ -1434,6 +1450,19 @@ function toggleVoice() {
 
     console.log(`语音${voiceEnabled ? '已开启' : '已关闭'}`);
     return voiceEnabled;
+}
+
+// 切换自动发送开关
+function toggleAutoSend() {
+    autoSendEnabled = !autoSendEnabled;
+
+    const toggleBtn = document.getElementById('autoSendToggle');
+    if (toggleBtn) {
+        toggleBtn.classList.toggle('active', autoSendEnabled);
+    }
+
+    console.log(`自动发送${autoSendEnabled ? '已开启' : '已关闭'}`);
+    return autoSendEnabled;
 }
 
 // 卡通人物动画控制

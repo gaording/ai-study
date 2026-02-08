@@ -281,9 +281,14 @@
                 <div class="interview-chat" id="interviewChat" style="display: none;">
                     <!-- 卡通面试官 -->
                     <div class="interviewer-container">
-                        <button id="voiceToggle" class="voice-toggle active" onclick="toggleVoice()" title="点击开启/关闭语音">
-                            🔊 语音开
-                        </button>
+                        <div class="voice-controls">
+                            <button id="voiceToggle" class="voice-toggle active" onclick="toggleVoice()" title="点击开启/关闭语音">
+                                🔊 语音
+                            </button>
+                            <button id="autoSendToggle" class="voice-toggle active" onclick="toggleAutoSend()" title="点击开启/关闭自动发送">
+                                ⚡ 自动发送
+                            </button>
+                        </div>
                         <div class="interviewer-avatar" id="interviewerAvatar">
                             <svg class="avatar-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                                 <!-- 背景圆 -->
@@ -375,12 +380,37 @@
     </footer>
 
     <!-- JavaScript -->
+    <script src="config.js"></script>
+    <script>
+        // 检查配置是否加载成功
+        if (!window.CONFIG || !window.CONFIG.ZHIPU_API_KEY || window.CONFIG.ZHIPU_API_KEY === 'your-api-key-here') {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: Arial, sans-serif;">
+                        <div style="text-align: center; padding: 40px; background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                            <h2 style="color: #e74c3c;">⚠️ 配置文件缺失</h2>
+                            <p style="color: #666; margin: 20px 0;">
+                                请先配置 API Key 才能使用此应用。
+                            </p>
+                            <div style="text-align: left; background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                                <strong>配置步骤：</strong>
+                                <ol style="margin: 10px 0; padding-left: 20px;">
+                                    <li>复制 <code>config.example.js</code> 为 <code>config.js</code></li>
+                                    <li>在 <code>config.js</code> 中填入你的智谱AI API Key</li>
+                                    <li>刷新页面即可使用</li>
+                                </ol>
+                                <p style="margin: 10px 0 0 0; font-size: 14px; color: #999;">
+                                    获取 API Key: <a href="https://open.bigmodel.cn/" target="_blank">https://open.bigmodel.cn/</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
     <script src="js/jobAgentClient.js"></script>
     <script src="js/resumeParser.js?v=8"></script>
-    <script src="js/app.js?v=17"></script>
-    <script>
-        // 配置智谱AI API密钥
-        window.ZHIPU_API_KEY = 'b530d21ff0b748c39f874fb47a0e7689.Cc5D9ojd4y4myeB6';
-    </script>
+    <script src="js/app.js?v=22"></script>
 </body>
 </html>

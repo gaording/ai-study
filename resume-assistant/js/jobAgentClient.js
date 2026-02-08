@@ -201,11 +201,11 @@ ${this.buildJobRequirements(jobData)}
                 role: 'user',
                 content: userAnswer
             });
-        } else {
-            // 第一次面试，请候选人自我介绍
+        } else if (messages.length === 1) {
+            // 第一次面试，添加一个初始 user 消息来触发 AI 的开场白
             messages.push({
-                role: 'assistant',
-                content: '你好，欢迎来到我们公司面试。请先做个自我介绍吧，大概3分钟左右，重点说说您的工作经历和项目经验。'
+                role: 'user',
+                content: '你好'
             });
         }
 
@@ -217,6 +217,8 @@ ${this.buildJobRequirements(jobData)}
         };
 
         console.log('💬 AI面试官正在思考...');
+        console.log('发送消息数量:', messages.length);
+        console.log('请求参数:', JSON.stringify(requestBody, null, 2));
 
         try {
             const response = await fetch(this.chatUrl, {
@@ -229,11 +231,23 @@ ${this.buildJobRequirements(jobData)}
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
+                const responseText = await response.text();
+                console.log('API响应状态:', response.status);
+                console.log('API响应内容:', responseText);
+
+                let errorData;
+                try {
+                    errorData = JSON.parse(responseText);
+                } catch (e) {
+                    errorData = { error: { message: responseText } };
+                }
                 throw new Error(errorData.error?.message || 'AI回复失败');
             }
 
             const result = await response.json();
+            console.log('API响应状态:', response.status);
+            console.log('API响应数据:', JSON.stringify(result, null, 2));
+
             const content = result.choices?.[0]?.message?.content;
 
             console.log('✅ AI面试官回复完成');
